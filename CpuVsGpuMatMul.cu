@@ -34,11 +34,23 @@ void cpuMatMul( int matrix1ColCount, int matrix1RowCount, auto  &matrix1, int ma
 
 }
 
+__global__ void gpuMatMul(float A[2][2], float B[2][2], float C[2][2])
+{
+	int i = threadIdx.x;
+	int j = threadIdx.y;
+	C[i][j] = A[i][j] + B[i][j];
+	cout << C[i][j] << endl;
+}
+	
+
 int main() {
     int matLen = 2;
     int matrix1[2][2] = {{1,3},{4,6}};
     int matrix2[2][2] = {{2,0},{5,4}};
     cpuMatMul(2,2, matrix1, 2,2, matrix2);
+	
+	dim3 threadsPerBlock(2, 2);
+	gpuMatMul<<1, threadsPerBlock>>(A, B, C);
     
   
   return 0;
