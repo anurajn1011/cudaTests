@@ -39,7 +39,7 @@ __global__ void gpuMatMul(float A[2][2], float B[2][2], float C[2][2])
 	int i = threadIdx.x;
 	int j = threadIdx.y;
 	C[i][j] = A[i][j] + B[i][j];
-	cout << C[i][j] << endl;
+	// cout << C[i][j] << endl;
 }
 	
 
@@ -49,8 +49,12 @@ int main() {
     int matrix2[2][2] = {{2,0},{5,4}};
     cpuMatMul(2,2, matrix1, 2,2, matrix2);
 	
+    
+    int A[2][2] = {{2,0},{5,4}};
+    int B[2][2] = {{1,3},{4,6}};
+    int C[2][2];
 	dim3 threadsPerBlock(2, 2);
-	gpuMatMul<<1, threadsPerBlock>>(A, B, C);
+	gpuMatMul<<<1, threadsPerBlock>>>(A, B, C);
     
   
   return 0;
