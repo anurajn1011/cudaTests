@@ -1,0 +1,5 @@
+Meeting Notes for 6/30/25 
+
+Wrote C++ code for matrix multiplication, naive method, via the cpu. Discussed the programming model of CUDA.
+Core concepts were grids, blocks, threads. Towards the tail-end, we attempted to implement the naive method for 
+matrix multiplication via the GPU. This task - the preliminary version - was completed on 7/1/25 by Anuraj N. Compilation is still required to test the validity of code. 
