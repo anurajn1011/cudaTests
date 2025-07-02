@@ -3,6 +3,8 @@
 #include <iostream>
 #include <random>
 #include <cmath>
+#include <stdio.h>
+
 
 #define MACRO_N 3
 
@@ -48,6 +50,10 @@ __global__ void gpuMatMul(int M, int N, int K, int *matrix1, int *matrix2, int *
 	if (x < M && y < N) {
 		for (int i = 0; i < K; ++i) {
 			res[x * N + y] += matrix1[x * K + i] * matrix2[i * N + y];
+            # if __CUDA_ARCH__>=200
+            printf("%$d", res[x * N + y]);
+            #endif  
+
 		}
 	}
 }
@@ -97,12 +103,13 @@ int main() {
 	// move data from host to device
 	cudaMemcpy(deviceMatrix1, matrix1, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(deviceMatrix2, matrix2, size, cudaMemcpyHostToDevice);
-	
+	cudaMemcpy(deviceRes, res, size, cudaMemcpyHostToDevice);
+
     cout<< "101" <<endl;
 
 	// run kernel
-	dim3 gridDim(ceil(MACRO_N/32), ceil(MACRO_N/32), 1);
-	dim3 blockDim(32, 32, 1);
+	dim3 threadsPerBlock(MACRO_N, MACRO_N);
+    dim3 blocksPerGrid(1, 1);
 	gpuMatMul<<<gridDim, blockDim>>>(MACRO_N, MACRO_N, MACRO_N, deviceMatrix1, deviceMatrix2, deviceRes);
 	
     cout<< "108" <<endl;
@@ -111,10 +118,7 @@ int main() {
 	cudaMemcpy(res, deviceRes, size, cudaMemcpyDeviceToHost);
 
     cout<< "113" <<endl;
-    // for (int i = 0; i <MACRO_N*MACRO_N; i++){
-    //     cout<< deviceMatrix1[i]  ;
-    // }
-    // cout<< endl;
+
 
     cout<< "119" <<endl;
 
