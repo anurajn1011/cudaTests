@@ -48,13 +48,15 @@ __global__ void gpuMatMul(int M, int N, int K, int *matrix1, int *matrix2, int *
 	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	
 	if (x < M && y < N) {
+		int sum = 0;
 		for (int i = 0; i < K; ++i) {
-			res[x * N + y] += matrix1[x * K + i] * matrix2[i * N + y];
-            # if __CUDA_ARCH__>=200
+			sum += matrix1[x * K + i] * matrix2[i * N + y];
+			
+            /*# if __CUDA_ARCH__>=200
             printf("%$d", res[x * N + y]);
-            #endif  
-
+            #endif*/
 		}
+		res[x * N + y] = sum; // explicity definition of indices, GPU isn't immediately zero'd.
 	}
 }
 	
@@ -86,10 +88,9 @@ int main() {
     cout<< "80" <<endl;
 	
 	// creating host arrays, 
-	for (int i = 0; i < MACRO_N*MACRO_N; ++i) {
+	for (int i = 1; i < MACRO_N*MACRO_N + 1; ++i) {
 		matrix1[i] = i;
 		matrix2[i] = i;
-		res[i] = 0;
 	}
 	
     cout<< "80" <<endl;
@@ -103,19 +104,24 @@ int main() {
 	// move data from host to device
 	cudaMemcpy(deviceMatrix1, matrix1, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(deviceMatrix2, matrix2, size, cudaMemcpyHostToDevice);
-	cudaMemcpy(deviceRes, res, size, cudaMemcpyHostToDevice);
+	// cudaMemcpy(deviceRes, res, size, cudaMemcpyHostToDevice); only do this if res has initial vals
 
     cout<< "101" <<endl;
 
 	// run kernel
 	dim3 threadsPerBlock(MACRO_N, MACRO_N);
     dim3 blocksPerGrid(1, 1);
-	gpuMatMul<<<gridDim, blockDim>>>(MACRO_N, MACRO_N, MACRO_N, deviceMatrix1, deviceMatrix2, deviceRes);
+	gpuMatMul<<<blocksPerGrid, threadsPerBlock>>>(MACRO_N, MACRO_N, MACRO_N, deviceMatrix1, deviceMatrix2, deviceRes);
 	
     cout<< "108" <<endl;
 
 	// moving result to host
 	cudaMemcpy(res, deviceRes, size, cudaMemcpyDeviceToHost);
+	
+	cudaError_t error = cudaGetLastError();
+	if (err != cudaSuccess) {
+		cout << "CUDA Error: " << cudaGetStringError(error) << endl;
+	}
 
     cout<< "113" <<endl;
 
