@@ -56,7 +56,7 @@ __global__ void gpuMatMul(int M, int N, int K, int *matrix1, int *matrix2, int *
             printf("%$d", res[x * N + y]);
             #endif*/
 		}
-		res[x * N + y] = sum; // explicity definition of indices, GPU isn't immediately zero'd.
+		res[x * N + y] = sum; // explicit definition of indices, GPU isn't immediately zero'd.
 	}
 }
 	
