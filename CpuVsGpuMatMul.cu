@@ -2,8 +2,9 @@
 #include <nvtx3/nvToolsExt.h>
 #include <iostream>
 #include <random>
+#include <cmath>
 
-#define N 1000
+#define MACRO_N 3
 
 using namespace std;
 
@@ -38,13 +39,13 @@ void cpuMatMul( int matrix1ColCount, int matrix1RowCount, auto  &matrix1, int ma
 }
 
 // ordinary multipliction, not GMEM
-__global__ void gpuMatMul(int M, int N, int K, int &matrix1, int &matrix2, int &res)
+__global__ void gpuMatMul(int M, int N, int K, int *matrix1, int *matrix2, int *res)
 {
 	// the thread locates the indices of C for which it is responsible for
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
+	int x = blockIdx.x * blockDim.x + threadIdx.x;
+	int y = blockIdx.y * blockDim.y + threadIdx.y;
 	
-	if (i < M && j < N) {
+	if (x < M && y < N) {
 		for (int i = 0; i < K; ++i) {
 			res[x * N + y] += matrix1[x * K + i] * matrix2[i * N + y];
 		}
@@ -53,6 +54,7 @@ __global__ void gpuMatMul(int M, int N, int K, int &matrix1, int &matrix2, int &
 	
 
 int main() {
+    cout<< "57" <<endl;
     // int matLen = 2;
     //int matrix1[2][2] = {{1,3},{4,6}};
     //int matrix2[2][2] = {{2,0},{5,4}};
@@ -65,45 +67,67 @@ int main() {
 	//dim3 threadsPerBlock(2, 2);
 	//gpuMatMul<<<1, threadsPerBlock>>>(A, B, C);
 	
-	int **matrix1, **matrix2, **res;
-	int **deviceMatrix1, **deviceMatrix2, **deviceRes;
-	size_t size = N * N * sizeof(int); // N is a macro
+	int *matrix1, *matrix2, *res;
+	int *deviceMatrix1, *deviceMatrix2, *deviceRes;
+	size_t size = MACRO_N * MACRO_N * sizeof(int); // N is a macro
 	
+    cout<< "74" <<endl;
 	// allocate host memory
-	matrix1 = (*int)malloc(size);
-	matrix2 = (*int)malloc(size);
-	res = (*int)malloc(size);
+	matrix1 = (int*)malloc(size);
+	matrix2 = (int*)malloc(size);
+	res = (int*)malloc(size);
+
+    cout<< "80" <<endl;
 	
 	// creating host arrays, 
-	for (int i = 0; i < N; ++i) {
-		for (int j = 0; j < N; ++j) {
-			matrix1[i][j] = j;
-			matrix2[i][j] = j;
-			res[i][j] = 0;
-		}
+	for (int i = 0; i < MACRO_N*MACRO_N; ++i) {
+		matrix1[i] = i;
+		matrix2[i] = i;
+		res[i] = 0;
 	}
 	
+    cout<< "80" <<endl;
 	// allocation of memory
 	cudaMalloc(&deviceMatrix1, size);
 	cudaMalloc(&deviceMatrix2, size);
 	cudaMalloc(&deviceRes, size);
 	
+    cout<< "95" <<endl;
+
 	// move data from host to device
 	cudaMemcpy(deviceMatrix1, matrix1, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(deviceMatrix2, matrix2, size, cudaMemcpyHostToDevice);
 	
+    cout<< "101" <<endl;
+
 	// run kernel
-	dim3 gridDim(CEIL_DIV(N, 32), CEIL_DIV(N, 32), 1);
+	dim3 gridDim(ceil(MACRO_N/32), ceil(MACRO_N/32), 1);
 	dim3 blockDim(32, 32, 1);
-	gpuMatMul<<<gridDim, blockDim>>>(N, N, N, deviceMatrix1, deviceMatrix2, deviceRes);
+	gpuMatMul<<<gridDim, blockDim>>>(MACRO_N, MACRO_N, MACRO_N, deviceMatrix1, deviceMatrix2, deviceRes);
 	
+    cout<< "108" <<endl;
+
 	// moving result to host
-	cudaMemcpy(res, deviceRes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(res, deviceRes, size, cudaMemcpyDeviceToHost);
+
+    cout<< "113" <<endl;
+    // for (int i = 0; i <MACRO_N*MACRO_N; i++){
+    //     cout<< deviceMatrix1[i]  ;
+    // }
+    // cout<< endl;
+
+    cout<< "119" <<endl;
+
+    for (int i = 0; i <MACRO_N*MACRO_N; i++){
+        cout<< res[i] ;
+    }
+    cout<< endl;
 	
+    cout<< "126" <<endl;
 	// freeing memory
 	free(matrix1);
-	free(matrix2)
-	free(res)
+	free(matrix2);
+	free(res);
 	
 	cudaFree(deviceMatrix1);
 	cudaFree(deviceMatrix2);
