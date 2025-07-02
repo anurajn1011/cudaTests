@@ -1,0 +1,13 @@
+Meeting 7-1-25
+
+Our aim is to accomplish our objective by August 15th. Our goal is to implement a High Frequency Trading model. 
+
+The HFT algorithms we are interested in revolve around statistical-arbitrage or market making. Discussed the notion of HFT's with ETF's,
+considering the volatility of these goods (perhaps other metric which we remain as of yet ignorant to?) to measure the trend. 
+The idea for the "conglomerate" algorithmic system which had been discussed previously was mentioned again, in so far as being a tool
+for risk mitigation for financial portfolios. 
+
+-- Matrix Multiplication via GPU --
+Some initial bugs, these were quickly resolved. However, we soon discovered that our kernel was not performing any computational tasks.
+We attempted to modify our code, followed debugging principles, and referenced countless forums and documentation hubs, to no avail.
+Lastly, asking ChatGPT, the issues was still not resolved and resulted in compilation error. This problem will be followed up on in the next meeting.
