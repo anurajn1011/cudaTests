@@ -89,10 +89,15 @@ int main() {
 	
 	// creating host arrays, 
 	for (int i = 1; i < MACRO_N*MACRO_N + 1; ++i) {
-		matrix1[i] = i;
-		matrix2[i] = i;
+		matrix1[i-1] = i;
+		matrix2[i-1] = i;
 	}
 	
+
+	for (int i = 0; i <MACRO_N*MACRO_N; i++){
+        cout<< matrix1[i]  << " " ;
+    }
+
     cout<< "80" <<endl;
 	// allocation of memory
 	cudaMalloc(&deviceMatrix1, size);
@@ -119,8 +124,8 @@ int main() {
 	cudaMemcpy(res, deviceRes, size, cudaMemcpyDeviceToHost);
 	
 	cudaError_t error = cudaGetLastError();
-	if (err != cudaSuccess) {
-		cout << "CUDA Error: " << cudaGetStringError(error) << endl;
+	if (error != cudaSuccess) {
+		cout << "CUDA Error: " << cudaGetErrorString(error) << endl;
 	}
 
     cout<< "113" <<endl;
@@ -129,7 +134,7 @@ int main() {
     cout<< "119" <<endl;
 
     for (int i = 0; i <MACRO_N*MACRO_N; i++){
-        cout<< res[i] ;
+        cout<< res[i]  << " " ;
     }
     cout<< endl;
 	
@@ -147,3 +152,13 @@ int main() {
   return 0;
 }
 
+
+
+
+
+
+
+
+// 15 18 21 
+// 42 54 66
+// 69 90 111
