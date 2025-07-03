@@ -1,0 +1,29 @@
+-- Meeting 7/3/25 --
+
+GPU Matrix Multiplication: 
+Anuraj had edited the matrix multiplication for cuda to reflect the changes in threads and blocks. Further, added error handling and explicitly defined the values of each index in deviceRes within the kernel. 
+Despite this, compilation resulted in an error. This was solved by an update to the GPU drivers. Successful compilation and the desirable result was achieved. 
+
+Discussion on High Frequency Trading w/ Respect to Stat-Arb:
+Today's discussion defined some of the goals which we are aiming for. We wish to complete most of our tasks by August 15th. 
+
+-> The following information was gleaned from Investopedia and Hudson and Thames, with finer details <-
+filled in by research articles
+  The mean reversion aim of stat-arb is executed in two phases:
+    1. Scoring - ranking available stock based on investment desirability.
+    2. Risk-Reduction - Combine desirable assets into a tailored portfolio to minimize risk.
+For our implementation, we will focus on Pairs-Trading. Pairs-Trading, as defined by Hudson and Thames, is as follows; A strategy which takes advantage of the mispricing between 2 (or more) co-moving assets, taking long
+in some and short in others, betting that the relationship holds and the prices will converge to equilibrium. 
+
+Intended Workflow*
+  1. Discovery: Use of cointegration methods or PCA for finding relationships. 
+  2. Modeling: Fit Ornstein-Uhlenbleck (consider other mean reverting models) to quantify the spread dynamics and mean-reversion strength (e.g. Hurst Exponent).
+  3. Validation: Use ML/Stats models. Predict spread reversion, entry/exit timing, risk estimation, transaction costs, regime changes, etc. Backtesting comes to play starting here. 
+  4. Execution: Implement trades with real time monitoring, hedging, and risk controls. 
+
+With this outlined workflow, our expectation is to complete the formulation of steps 1 and 2 in the matter of, at most, 2 weeks. Validation and Execution require more planning and structure and will likely require the bulk
+of effort to nail down.
+
+
+
+*This is for our model being the Ornstein-Uhlenbleck Process. We can swap this out for more contemporary strategies such as neural networks but this suffices for our purposes. 
