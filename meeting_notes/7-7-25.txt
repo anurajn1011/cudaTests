@@ -1,0 +1,4 @@
+Last week, we discussed a 4 step path for constructing our stat-arb strategy. This meeting we took the first steps into the first step, Discovery.
+
+While pair-coding, we implemented a basic API call to Alpaca to see if we could obtain share prices at minute intervals on a single day. This task was quickly accomplished by referencing previous projects and Alpaca documentation. 
+Of important note, Alpaca will only provide data IF there was a trade(s) at any particular time stamp for the share. This leaves some data sets having time gaps. One solution is to fill in the time gaps with last reported price.
