@@ -18,6 +18,7 @@ import backtrader.feeds as btfeeds
 from alpaca.data import StockHistoricalDataClient, StockBarsRequest
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
@@ -36,14 +37,16 @@ def get_symbol_history(symbol, simulationStartDate, simulationEndDate):  # retur
     # SimulationEndDate string
     # Converting string representation of dates to datetime objs for TimeFrame
     # datetime format
-    dtStartDate = string_to_datetime(simulationStartDate)
-    dtEndDate = string_to_datetime(simulationEndDate)
+    # dtStartDate = string_to_datetime(simulationStartDate)
+    # dtEndDate = string_to_datetime(simulationEndDate)
+    dtStartDate = simulationStartDate
+    dtEndDate = simulationEndDate
     # timeframe
     time_frame = get_timeframe()
 
     request_params = StockBarsRequest(
         symbol_or_symbols=[symbol],
-        timeframe=time_frame,
+        timeframe=TimeFrame.Minute,
         start=dtStartDate,
         end=dtEndDate,
     )
@@ -57,7 +60,7 @@ def string_to_datetime(date):
 
 # Create timeframe object
 def get_timeframe():
-    tf_unit = TimeFrameUnit('Day')
+    tf_unit = TimeFrameUnit("Min")
     return TimeFrame(1, tf_unit)
 
 
@@ -76,7 +79,16 @@ BTC/USD 	    2022-09-01 05:00:00+00:00   	20049.0 	20285.0	    19555.0 	20160.0 
 # ---------------------------------------------------------------------
 
 
-stockSymbol_ge_hist = get_symbol_history("GE", "2021-12-01", "2023-01-15" )
+target_date = datetime(2025, 7, 7) # Replace with your desired date
+
+# Define the start and end of the day
+# start_of_day = target_date.replace(hour=0, minute=0, second=0, microsecond=0)
+start_of_day = datetime(2025, 7, 3, 13, 0)
+end_of_day   = datetime(2025, 7, 4, 21, 0)
+
+
+
+stockSymbol_ge_hist = get_symbol_history("TSLA", start_of_day, end_of_day )
 print(stockSymbol_ge_hist)
 
 
@@ -84,17 +96,17 @@ print(stockSymbol_ge_hist)
 # movinAvgCross(100000, 5, 20, "SPY", "2021-12-01", "2023-01-15")
 # movinAvgCross(100000, 5, 20, "GE", "2021-12-01", "2023-01-15" )
 
-time_series=stockSymbol_ge_hist["open"]
-series1=stockSymbol_ge_hist["open"]
-series2=stockSymbol_ge_hist["close"]
+# time_series=stockSymbol_ge_hist["open"]
+# series1=stockSymbol_ge_hist["open"]
+# series2=stockSymbol_ge_hist["close"]
 
-# TODO
-result = adfuller(time_series)
-print('ADF Statistic:', result[0])
-print('p-value:', result[1])
+# # TODO
+# result = adfuller(time_series)
+# print('ADF Statistic:', result[0])
+# print('p-value:', result[1])
 
 
 
-score, pvalue, _ = coint(series1, series2)
-print('Cointegration test statistic:', score)
-print('p-value:', pvalue)
+# score, pvalue, _ = coint(series1, series2)
+# print('Cointegration test statistic:', score)
+# print('p-value:', pvalue)
