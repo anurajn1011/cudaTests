@@ -98,11 +98,15 @@ class DataProcessing(AlpacaDataGetter):
     
     def drop_rows(self, series1: pd.DataFrame, series2: pd.DataFrame) -> Iterable[pd.DataFrame]:
         ''' 
-            Remove the rows which both Time Series do not share, returning a uniform number of rows between two assets 
+            Remove the rows which both Time Series do not share, returning a uniform number of rows between two assets and re-indexing them appropriately.
         '''
         
-        timestampsSeries1 = series1.index.get_level_values('timestamp')
-        timestampsSeries2 = series2.index.get_level_values('timestamp')
-        series1 = series1[timestampsSeries1.isin(timestampsSeries2)]
-        series2 = series2[timestampsSeries2.isin(timestampsSeries1)]
-        return (series1, series2)
+        # timestampsSeries1 = series1.index.get_level_values('timestamp')
+        # timestampsSeries2 = series2.index.get_level_values('timestamp')
+        # series1 = series1[timestampsSeries1.isin(timestampsSeries2)]
+        # series2 = series2[timestampsSeries2.isin(timestampsSeries1)]
+        # return (series1, series2)
+
+        series1 = series1['open'].reset_index(level='symbol', drop=True)
+        series2 = series2['open'].reset_index(level='symbol', drop=True)
+        return series1.align(series2, join='inner')
