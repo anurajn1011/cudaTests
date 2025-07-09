@@ -1,0 +1,36 @@
+# File for Engle-Granger Test - 7/9/25
+
+import pandas as pd
+from DataProcessing import DataProcessing
+from statsmodels.tsa.stattools import coint, adfuller
+
+'''
+    Step 1: Validate for the expected stationarity/heteroscedacity of individual assets via ADF
+    Step 2: Perfom an Ordinary Least Squares(OLS) regression of one asset on the other
+    Step 3: Validate the residuals on the ADF, verifying for I(1)
+'''
+
+def adf(**kwargs) -> list:
+    '''
+        In the case of Engle-Granger, two time series are provided. Each are independently checked for heteroscedasticity.
+        The method adfuller returns a tuple: (test statistic, p-value, used lag, number of observations, critical values, maximized information criterion).
+        H0: Time Series has a unit root (Non-Stationary)
+        H1: Time Series does not have a unit root (Stationary)
+        Confidence Level of 95% and p < 0.05 for rejection
+    '''
+    adfRes = []
+    for key, series in kwargs.items():
+        res = adfuller(series)
+        adfRes.append([key].extend(res))
+        if res[1] < 0.05 and res[0] < res[4]['5%']:
+            print(f"We can reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} less than the corresponding critical value at 5% of {res[4]['5%']}.\n")
+        else:
+            print(f"Failed to reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
+    return adfRes
+
+
+alpaca = DataProcessing()
+start, end = alpaca.set_time(7, 3, 2025)
+
+sample = alpaca.get_symbol_history("TSLA", start, end)
+adf(TSLA=sample['open'])

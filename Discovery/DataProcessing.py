@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from alpha_vantage.timeseries import TimeSeries
 
 # Custom library of AlpacaData
-from Discovery.AlpacaDataGetter import AlpacaDataGetter
+from AlpacaDataGetter import AlpacaDataGetter
 
 # AlphaVantage
 # alphaVantageAPIKey = os.getenv("ALPHAVANTAGE_KEY")
@@ -31,34 +31,16 @@ from Discovery.AlpacaDataGetter import AlpacaDataGetter
 # filteredData = data[data.index.date == pd.to_datetime(targetDate).date()]
 # print(filteredData)
 
-analyzer = AlpacaDataGetter()
+# analyzer = AlpacaDataGetter()
 
-# reading the data
-def readDataToDF(filename) -> pd.DataFrame:
-    df = pd.read_csv(filename)
-    return df
 # df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\nasdaq_screener.csv')
-
-def samplingDataNumRows(dataframe, state) -> pd.DataFrame:
-    df = dataframe.sample(n=100, random_state=state)
-    return df
 # sampling 100 random rows from df and storing it in new dataset, batch 00
 # df_new = df.sample(n=100, random_state=40)
 # df_new.to_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hundred_nasdaq_00.csv', index=False)
 
-# time range, UTC
-def setTime(month, day, year) -> Iterable[datetime, datetime]:
-    start_of_day = datetime(year, month, day, 13, 0) 
-    end_of_day = start_of_day + timedelta(days=1)
-    if start_of_day.month != end_of_day.month:
-        if start_of_day.year != end_of_day.year:
-            end_of_day = datetime(year + 1, 1, 1, 21, 0)
-        else:
-            end_of_day = datetime(year, month + 1, 1, 21, 0)
-    return (start_of_day, end_of_day)
-
-# checking each ticker for stationarity
-df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hundred_nasdaq_00.csv')
+    
+# df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hundred_nasdaq_00.csv')
+# start, end = setTime(7, 3, 2025)
 
 # stationarity = adfuller(time_series)
 # print('ADF Statistic:', result[0])
@@ -79,3 +61,48 @@ df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hu
 
 # stockSymbolHistory = analyzer.get_symbol_history('WOLF', start_of_day, end_of_day)
 # print(stockSymbolHistory)
+
+class DataProcessing(AlpacaDataGetter):
+    def __init__(self):
+        super().__init__()
+    
+    def read_data_to_DF(self, filename: str) -> pd.DataFrame:
+        ''' 
+            Load csv to pandas df 
+        '''
+
+        df = pd.read_csv(filename)
+        return df
+    
+    def sampling_data_num_rows(self, dataframe: pd.DataFrame, samples: int, state: int) -> pd.DataFrame:
+        ''' 
+            Withdraw n rows from the df and provide a seed for the random state 
+        '''
+
+        df = dataframe.sample(n=samples, random_state=state)
+        return df
+    
+    def set_time(self, month: int, day: int, year: int) -> Iterable[datetime]:
+        ''' 
+            Return a single day -- Alpaca Deals in UTC
+        '''
+
+        start_of_day = datetime(year, month, day, 13, 0) 
+        end_of_day = start_of_day + timedelta(days=1)
+        if start_of_day.month != end_of_day.month:
+            if start_of_day.year != end_of_day.year:
+                end_of_day = datetime(year + 1, 1, 1, 21, 0)
+            else:
+                end_of_day = datetime(year, month + 1, 1, 21, 0)
+        return (start_of_day, end_of_day)
+    
+    def drop_rows(self, series1: pd.DataFrame, series2: pd.DataFrame) -> Iterable[pd.DataFrame]:
+        ''' 
+            Remove the rows which both Time Series do not share, returning a uniform number of rows between two assets 
+        '''
+        
+        timestampsSeries1 = series1.index.get_level_values('timestamp')
+        timestampsSeries2 = series2.index.get_level_values('timestamp')
+        series1 = series1[timestampsSeries1.isin(timestampsSeries2)]
+        series2 = series2[timestampsSeries2.isin(timestampsSeries1)]
+        return (series1, series2)
