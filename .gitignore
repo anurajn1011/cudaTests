@@ -1,3 +1,2 @@
 .env
-datasets\nyse-listed.csv
-datasets\nasdaq_screener.csv
+datasets/
