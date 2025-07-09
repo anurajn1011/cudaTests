@@ -1,0 +1,8 @@
+Continuation of the previous meeting. 
+
+Refactored some of the code for ease of use and for cleaning redundancies. 
+Created a data_cleaning file to pull out the tickers that fill out every minute of the trading day.
+Using the nasdaq dataset was tedious and took some time. We decided on trying to look at subsets of the dataset instead.
+We also used AlphaVantage's API to try out their endpoints and we find similar results. 
+Perhaps when we have gaps in time between two assets, we can run cointegration tests strictly on the shared time stamps, omitting the times
+where one of the assets lacks data.
