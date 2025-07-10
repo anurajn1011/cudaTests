@@ -11,22 +11,24 @@ from DataProcessing import DataProcessing
 '''
 
 
-df = pd.read_csv('sample_hundred_nasdaq_00.csv')
+df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hundred_nasdaq_00.csv')
 
 alpaca = DataProcessing()
 start, end = alpaca.set_time(7, 3, 2025)
 
-for stock in df['Symbol']:
+for i in range(len(df)):
+    if '^' not in df.iloc[i, 0]:
+        series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
+        for j in range(i + 1, len(df)):
+            series2 = alpaca.get_symbol_history(df.iloc[j, 0], start, end)
+            bool1, bool2 = adf(stock1=series1, stock2=series2)
+            if not bool1 and not bool2:
+                X, Y = alpaca.drop_rows(series1, series2)
+                Y = sm.add_constant(Y)
+                # performing OLS with X, Y
+                test = sm.OLS(X, Y).fit()
+                result = adf(residual=test.resid)
+    # print("The residuals at each time step: ", test.resid)
+    # print("Alpha and beta of OLS respectively: \n", test.params)
     
-    series1 = alpaca.get_symbol_history(stock, start, end)
-    
-
-    X, Y = alpaca.drop_rows(series1, series2)
-    Y = sm.add_constant(Y)
-
-    # performing OLS with X, Y
-    test = sm.OLS(X, Y).fit()
-    print("The residuals at each time step: ", test.resid)
-    print("Alpha and beta of OLS respectively: \n", test.params)
-    
-    res = adf(stock)
+    # res = adf(stock)

@@ -19,26 +19,19 @@ def adf(**kwargs) -> list:
         H1: Time Series does not have a unit root (Stationary)
         Confidence Level of 95% and p < 0.05 for rejection
     '''
-    condition = -1
     adfRes = []
     for key, series in kwargs.items():
-        if series.empty:
-            print(f"{key} has an empty series")
+        res = adfuller(series)
+        adfRes.append([key] + list(res))
+        if res[1] < 0.05 and res[0] < res[4]['5%']:
+            print(f"We can reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} less than the corresponding critical value at 5% of {res[4]['5%']}.\n")
         else:
-            res = adfuller(series)
-            adfRes.append([key] + list(res))
-            if res[1] < 0.05 and res[0] < res[4]['5%']:
-                print(f"We can reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} less than the corresponding critical value at 5% of {res[4]['5%']}.\n")
-                condition = 0
-            else:
-                print(f"Failed to reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
-                condition = 1
-    if len(adfRes) == 1:
-        if condition == 1:
-            print(f"{adfRes[0][0]} suggests that the two assets are not cointegrated.")
-        else:
-            print(f"As a consequence of the Engle-Granger Test {adfRes[0][0]} suggests that the two assets are cointegrated!")
-
+            print(f"Failed to reject the Null Hypothesis. {key} has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
+    # if len(adfRes) == 1:
+    #     if condition == 1:
+    #         print(f"{adfRes[0][0]} suggests that the two assets are not cointegrated.")
+    #     else:
+    #         print(f"As a consequence of the Engle-Granger Test {adfRes[0][0]} suggests that the two assets are cointegrated!")
     return adfRes
 
 
@@ -58,7 +51,7 @@ Y = sm.add_constant(Y)
 # performing OLS with X, Y
 test = sm.OLS(X, Y).fit()
 print("The residuals at each time step: ", test.resid)
-print("Alpha and beta of OLS respectively: \n", test.params)
+print("Alpha and beta of OLS respectively: \n", test.params) # alpha - intercept, beta - slope
 
 # checking for the stationarity of the OLS Residuals
 residuals = test.resid
