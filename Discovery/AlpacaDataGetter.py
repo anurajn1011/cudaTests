@@ -22,9 +22,6 @@ class AlpacaDataGetter:
         if not self.api_key or not self.secret_key:
             raise EnvironmentError("Missing ALPACA_KEY or ALPACA_SECRET in environment variables.")
 
-        print("API Key:", self.api_key)
-        print("Secret Key:", self.secret_key)
-
         self.stock_client = StockHistoricalDataClient(self.api_key, self.secret_key)
 
     def get_timeframe(self) -> TimeFrame:

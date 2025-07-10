@@ -1,7 +1,7 @@
 import pandas as pd
 from statsmodels.tsa.stattools import coint, adfuller
 import statsmodels.api as sm
-from engle_granger import adf
+from engle_granger import adf, OLSResiduals, coIntegrationTest
 from DataProcessing import DataProcessing
 
 '''
@@ -19,16 +19,13 @@ start, end = alpaca.set_time(7, 3, 2025)
 for i in range(len(df)):
     if '^' not in df.iloc[i, 0]:
         series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
+        series1 = series1['open'].reset_index(level='symbol', drop=True)
         for j in range(i + 1, len(df)):
             series2 = alpaca.get_symbol_history(df.iloc[j, 0], start, end)
-            bool1, bool2 = adf(stock1=series1, stock2=series2)
-            if not bool1 and not bool2:
-                X, Y = alpaca.drop_rows(series1, series2)
-                Y = sm.add_constant(Y)
-                # performing OLS with X, Y
-                test = sm.OLS(X, Y).fit()
-                result = adf(residual=test.resid)
-    # print("The residuals at each time step: ", test.resid)
-    # print("Alpha and beta of OLS respectively: \n", test.params)
-    
-    # res = adf(stock)
+            series2 = series2['open'].reset_index(level='symbol', drop=True)
+            print(df.iloc[i, 0], df.iloc[j, 0])
+            series1, series2 = series1.align(series2, join='inner')
+            boolSeries1, boolSeries2 = adf(series1), adf(series2)
+            if not boolSeries1 and not boolSeries2:
+                residuals = OLSResiduals(series1, series2)
+                boolCoIntegrated = coIntegrationTest(residuals)

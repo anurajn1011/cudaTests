@@ -106,7 +106,6 @@ class DataProcessing(AlpacaDataGetter):
         # series1 = series1[timestampsSeries1.isin(timestampsSeries2)]
         # series2 = series2[timestampsSeries2.isin(timestampsSeries1)]
         # return (series1, series2)
-
         series1 = series1['open'].reset_index(level='symbol', drop=True)
         series2 = series2['open'].reset_index(level='symbol', drop=True)
         return series1.align(series2, join='inner')
