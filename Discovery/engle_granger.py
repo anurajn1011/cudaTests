@@ -19,7 +19,7 @@ def adf(series) -> bool:
         Confidence Level of 95% and p < 0.05 for rejection
     '''
     res = adfuller(series)
-    if res[1] < 0.05 and res[0] < res[4]['5%']:
+    if res[1] < 0.05:
         print(f"We can reject the Null Hypothesis. Asset has a p-value of {res[1]} and a test statistic of {res[0]} less than the corresponding critical value at 5% of {res[4]['5%']}.\n")
         return True
     print(f"Failed to reject the Null Hypothesis. Asset has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
@@ -27,7 +27,7 @@ def adf(series) -> bool:
 
 def OLSResiduals(series1, series2):
     alpaca = DataProcessing()
-    series1, series2 =  alpaca.drop_rows(series1, series2)
+    # series1, series2 =  alpaca.drop_rows(series1, series2)
     series2 = sm.add_constant(series2)
     test = sm.OLS(series1, series2).fit()
     print("The residuals at each time step: ", test.resid)
@@ -37,7 +37,7 @@ def OLSResiduals(series1, series2):
 
 def coIntegrationTest(residuals):
     res = adfuller(residuals)
-    if res[1] < 0.05 and res[0] < res[4]['5%']:
+    if res[1] < 0.05:
         print(f"CO-INTEGRATED !We can reject the Null Hypothesis. The a p-value of {res[1]} and a test statistic of {res[0]} less than the corresponding critical value at 5% of {res[4]['5%']}.\n")
         return True
     print(f"NOT CO-INTEGRATED !Failed to reject the Null Hypothesis. The has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
