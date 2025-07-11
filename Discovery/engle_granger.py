@@ -4,6 +4,8 @@ import pandas as pd
 from statsmodels.tsa.stattools import coint, adfuller
 import statsmodels.api as sm
 from DataProcessing import DataProcessing
+import sys
+sys.path.append('../')
 '''
     Step 1: Validate for the expected stationarity/heteroscedacity of individual assets via ADF
     Step 2: Perfom an Ordinary Least Squares(OLS) regression of one asset on the other
