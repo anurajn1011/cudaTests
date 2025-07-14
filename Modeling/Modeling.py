@@ -5,6 +5,7 @@ import csv
 from datetime import date, datetime, timedelta
 from statsmodels.tsa.stattools import coint, adfuller
 from statsmodels.regression.linear_model import GLS
+from statsmodels.tools import add_constant
 
 from typing import Tuple, Iterable
 
@@ -42,9 +43,13 @@ def main():
         # Step 2: Compute delta Z_t by taking the differences of every element with its previous one
         deltaZ = residuals.diff().dropna()
         # Step 3: Regress delta Zt on z(t-1) via GLS.
+        print(deltaZ)
+        deltaZ = add_constant(deltaZ)
+        print(deltaZ)
         zLag = residuals.iloc[1:]
         gls_model = GLS(deltaZ, zLag).fit()
-        print(gls_model.summary())
+        # print(gls_model.summary())
+        break
         
 
     
