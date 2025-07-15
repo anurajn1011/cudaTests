@@ -11,6 +11,7 @@ end = datetime(2025, 1, 1, 13, 0)
 def pairSelection(df, output_file, threshold=5) -> None:
     data_batch = {}
     for i in range(len(df)):
+        print("Iteration: ", i)
         if df.iloc[i, 0].isalpha():
             series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
         # type checks
@@ -65,10 +66,10 @@ def writer(filename, data_batch) -> None:
 
 def main():
     data_batch = {}
-    df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\sample_hundred_nasdaq_00.csv')
+    df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\constituents.csv')
 
     ''' Step 1: pair selection via mse '''
-    pairSelection(df)
+    pairSelection(df, r"C:\Users\User\Documents\Projects\cudaTests\results\constituents_MSE.csv")
 
 if __name__ == "__main__":
     main()
