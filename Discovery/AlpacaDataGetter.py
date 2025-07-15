@@ -26,7 +26,7 @@ class AlpacaDataGetter:
 
     def get_timeframe(self) -> TimeFrame:
         """Returns 1-minute timeframe object."""
-        return TimeFrame(1, TimeFrameUnit("Min"))
+        return TimeFrame(1, TimeFrameUnit("Day"))
 
     def string_to_datetime(self, date_str: str) -> datetime:
         """Convert date string to datetime object."""

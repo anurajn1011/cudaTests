@@ -27,14 +27,14 @@ for i in range(len(df)):
         # type checks
         if isinstance(series1, pd.DataFrame):
                 if 'open' not in series1.columns:
-                    print(f"\t'open' column missing in series2 for {df.iloc[i, 0]}, skipping.")
+                    print(f"\t'open' column missing in series1 for {df.iloc[i, 0]}, skipping.")
                     continue
                 series1 = series1['open'].reset_index(level='symbol', drop=True)
         elif isinstance(series1, pd.Series):
             # Already a Series, no 'open' column to extract
             series1 = series1.reset_index(level='symbol', drop=True)
         else:
-            print(f"\tUnexpected data type for series2: {type(series1)}, skipping.")
+            print(f"\tUnexpected data type for series1: {type(series1)}, skipping.")
             continue
         for j in range(i + 1, len(df)):
             if df.iloc[j, 0].isalpha():
