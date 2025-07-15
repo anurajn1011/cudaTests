@@ -6,13 +6,10 @@ import statsmodels.api as sm
 from DataProcessing import DataProcessing
 import sys
 sys.path.append('../')
-import numpy as np
-
 '''
-    Step 1: Pair Selection using MSD
-    Step 2: Validate for the expected stationarity/heteroscedacity of individual assets via ADF
-    Step 3: Perfom an Ordinary Least Squares(OLS) regression of one asset on the other
-    Step 4: Validate the residuals on the ADF, verifying for I(1)
+    Step 1: Validate for the expected stationarity/heteroscedacity of individual assets via ADF
+    Step 2: Perfom an Ordinary Least Squares(OLS) regression of one asset on the other
+    Step 3: Validate the residuals on the ADF, verifying for I(1)
 '''
 
 def adf(series) -> bool:
@@ -48,8 +45,6 @@ def coIntegrationTest(residuals):
     print(f"NOT CO-INTEGRATED !Failed to reject the Null Hypothesis. The has a p-value of {res[1]} and a test statistic of {res[0]} with corresponding critical value at 5% of {res[4]['5%']}.\n")
     return False
 
-def meanSquaredDistance(series1, series2) -> int:
-    return np.mean((series1 - series2)**2)
 
 '''
     series1 = alpha + beta*series2 + residuals
