@@ -20,6 +20,7 @@ start, end = alpaca.set_time(7, 3, 2025)
 
 data_batch_00 = {}
 
+# cointegration
 for i in range(len(df)):
     if df.iloc[i, 0].isalpha():
         series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
