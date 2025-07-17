@@ -11,7 +11,6 @@ end = datetime(2025, 1, 1, 13, 0)
 def pairSelection(df, output_file, threshold=5) -> None:
     data_batch = {}
     for i in range(len(df)):
-        print("Iteration: ", i)
         if df.iloc[i, 0].isalpha():
             series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
         # type checks
@@ -49,9 +48,8 @@ def pairSelection(df, output_file, threshold=5) -> None:
                     break
                 print(df.iloc[i, 0], df.iloc[j, 0])
                 series1, series2 = series1.align(series2, join='inner')
-                mse = pairSelection(series1, series2)
+                mse = meanSquaredDistance(series1, series2)
                 if mse < threshold:
-                    mse = meanSquaredDistance(series1, series2)
                     print(f"MSE of {df.iloc[i, 0]} and {df.iloc[j, 0]} is: {mse}")
                     data_batch[df.iloc[i, 0]] = df.iloc[j, 0]
     writer(output_file, data_batch)
