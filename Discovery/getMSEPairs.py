@@ -64,10 +64,14 @@ def writer(filename, data_batch) -> None:
 
 def main():
     data_batch = {}
-    df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\constituents.csv')
+    df = pd.read_csv(r'C:\Users\jco10\Documents\PersonalProjects\cudaWAnuraj\cudaTests\datasets\constituents.csv')
+    
 
     ''' Step 1: pair selection via mse '''
-    pairSelection(df, r"C:\Users\User\Documents\Projects\cudaTests\results\constituents_MSE.csv")
+    # pairSelection(df, r"C:\Users\User\Documents\Projects\cudaTests\results\constituents_MSE.csv")
+    pairSelection(df, r"C:\Users\jco10\Documents\PersonalProjects\cudaWAnuraj\cudaTests\results\constituents_MSE.csv")
 
 if __name__ == "__main__":
     main()
+
+       
