@@ -5,6 +5,7 @@ from engle_granger import adf, OLSResiduals, coIntegrationTest
 from DataProcessing import DataProcessing
 import warnings
 import csv
+from datetime import datetime
 
 '''
     Step 1: Validate for the expected stationarity/heteroscedacity of individual assets via ADF
@@ -13,19 +14,21 @@ import csv
 '''
 
 
-df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\nasdaq_screener.csv')
+df = pd.read_csv(r'C:\Users\User\Documents\Projects\cudaTests\datasets\constituents_MSE.csv')
 
 alpaca = DataProcessing()
-start, end = alpaca.set_time(7, 3, 2025)
+start = datetime(2024, 1, 1, 13, 0) 
+end = datetime(2025, 1, 1, 13, 0) 
 
 data_batch_00 = {}
 
 # cointegration
 for i in range(len(df)):
-    if df.iloc[i, 0].isalpha():
+    if df.iloc[i, 0].isalpha() and df.iloc[i, 1].isalpha():
         series1 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
+        series2 = alpaca.get_symbol_history(df.iloc[i, 0], start, end)
         # type checks
-        if isinstance(series1, pd.DataFrame):
+        if isinstance(series1, pd.DataFrame) and isinstance(series2, pd.DataFrame):
                 if 'open' not in series1.columns:
                     print(f"\t'open' column missing in series1 for {df.iloc[i, 0]}, skipping.")
                     continue
@@ -36,6 +39,7 @@ for i in range(len(df)):
         else:
             print(f"\tUnexpected data type for series1: {type(series1)}, skipping.")
             continue
+        
         for j in range(i + 1, len(df)):
             if df.iloc[j, 0].isalpha():
                 series2 = alpaca.get_symbol_history(df.iloc[j, 0], start, end)
