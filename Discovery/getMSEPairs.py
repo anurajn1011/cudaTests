@@ -7,8 +7,8 @@ import pandas as pd
 alpaca = DataProcessing()
 start = datetime(2024, 1, 1, 13, 0) 
 end = datetime(2025, 1, 1, 13, 0) 
-
-def pairSelection(df, output_file, threshold=5) -> None:
+# Selecting pairs and writes out to a CSV 
+def generateStockPair2CSV_MSE(df, output_file, threshold=5) -> None:
     data_batch = {}
     for i in range(len(df)):
         if df.iloc[i, 0].isalpha():
@@ -52,13 +52,14 @@ def pairSelection(df, output_file, threshold=5) -> None:
                 if mse < threshold:
                     print(f"MSE of {df.iloc[i, 0]} and {df.iloc[j, 0]} is: {mse}")
                     data_batch[df.iloc[i, 0]] = (df.iloc[j, 0], mse)
-    writer(output_file, data_batch)
+                    writer(output_file, data_batch)
+        
 
 # 'C:\Users\User\Documents\Projects\cudaTests\results\nasdaq_screener_MSE.csv'
 def writer(filename, data_batch) -> None:
-     with open(filename, "w", newline="") as f:
+     with open(filename, "a", newline="") as f:
         w = csv.writer(f)
-        w.writerow(['index', 'Share_1', 'Share_2', 'mse'])
+        
         for index, (key, value) in enumerate(data_batch.items()):
             w.writerow([index, key] + list(value))
 
@@ -68,8 +69,8 @@ def main():
     
 
     ''' Step 1: pair selection via mse '''
-    # pairSelection(df, r"C:\Users\User\Documents\Projects\cudaTests\results\constituents_MSE.csv")
-    pairSelection(df, r"C:\Users\jco10\Documents\PersonalProjects\cudaWAnuraj\cudaTests\results\constituents_MSE.csv")
+    # generateStockPair2CSV_MSE(df, r"C:\Users\User\Documents\Projects\cudaTests\results\constituents_MSE.csv")
+    generateStockPair2CSV_MSE(df, r"C:\Users\jco10\Documents\PersonalProjects\cudaWAnuraj\cudaTests\results\constituents_MSE.csv")
 
 if __name__ == "__main__":
     main()
