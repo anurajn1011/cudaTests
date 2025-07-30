@@ -14,6 +14,11 @@ from datetime import datetime
 '''
 
 def testStockPairForCoInt(df, start, end):
+    '''
+        H0: There is no cointegrating relationship
+        H1: There is a cointegrating relationship
+        If p < 0.05, we can reject the Null Hypothesis.
+    '''
     alpaca = DataProcessing()
     data_batch_00 = {}
     # cointegration
@@ -55,7 +60,7 @@ def testStockPairForCoInt(df, start, end):
 
     # converting data to csv
     # with open(r'C:\Users\User\Documents\Projects\cudaTests\datasets\cointegration_pairs_nasdaq_screener.csv', "w", newline="") as f:
-    with open(r'C:\Users\jco10\Documents\PersonalProjects\cudaWAnuraj\cudaTests\Results\cointegration_pairs_hogAndC.csv', "w", newline="") as f:
+    with open(r'C:\Users\User\Documents\Projects\cudaTests\results\cointegrated_pairs_nasdaq_screener_postMSE.csv', "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(['index', 'key', 'value', 'p-value', 'test-statistic', 'critical-values'])
         for index, (key, value) in enumerate(data_batch_00.items()):
