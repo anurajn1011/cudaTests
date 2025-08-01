@@ -19,7 +19,7 @@ from alpaca.data import StockHistoricalDataClient, StockBarsRequest
 from dotenv import load_dotenv
 
 # Our Imports
-from Discovery.AlpacaDataGetter import AlpacaDataGetter
+
 
 
 '''
@@ -55,4 +55,9 @@ def calculationOfSpread(series1, series2):
         print(f"\tUnexpected data type for series1 or series2, skipping.")
 
     # second, we then fill in missing data for either with the previous time step.
+
+    timeReference =  pd.Series(series1.index.to_pydatetime().tolist()).align(pd.Series(series2.index.to_pydatetime().tolist()), join='outer')
+    print(timeReference)
+    
+    
     
