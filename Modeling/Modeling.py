@@ -58,6 +58,37 @@ def calculationOfSpread(series1, series2):
 
     timeReference =  pd.Series(series1.index.to_pydatetime().tolist()).align(pd.Series(series2.index.to_pydatetime().tolist()), join='outer')
     print(timeReference)
-    
-    
-    
+import pandas as pd
+import datetime
+
+def normalizeTimeSeries(timeSeries, date):
+    # Ensure timestamp is datetime and set index properly
+    timeSeries = timeSeries.copy()
+    timeSeries.index = pd.MultiIndex.from_tuples(
+        [(symbol, pd.to_datetime(ts)) for symbol, ts in timeSeries.index],
+        names=["symbol", "timestamp"]
+    )
+
+    normalizedFrames = []
+
+    startTime = datetime.datetime.combine(date, datetime.time(13, 0, 0)).replace(tzinfo=datetime.timezone.utc)
+    endTime = datetime.datetime.combine(date, datetime.time(21, 0, 0)).replace(tzinfo=datetime.timezone.utc)
+    fullTimeRange = pd.date_range(start=startTime, end=endTime, freq='1s')
+    initialPrice = timeSeries.head(1).iloc[0, 0]
+
+    for symbol, group in timeSeries.groupby(level="symbol"):
+        symbolDf = group.droplevel("symbol")
+        reindexedDf = symbolDf.reindex(fullTimeRange)
+        filledDf = reindexedDf.ffill()
+
+        for col in ["open", "high", "low", "close"]:
+            if col in filledDf.columns:
+                filledDf[col] = filledDf[col].fillna(initialPrice)
+        
+        filledDf["symbol"] = symbol
+        filledDf.set_index("symbol", append=True, inplace=True)
+        filledDf.index.set_names(["timestamp", "symbol"], inplace=True)
+        filledDf = filledDf.reorder_levels(["symbol", "timestamp"])
+        normalizedFrames.append(filledDf)
+
+    return pd.concat(normalizedFrames).sort_index()
