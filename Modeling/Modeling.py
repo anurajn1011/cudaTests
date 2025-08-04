@@ -35,32 +35,7 @@ from dotenv import load_dotenv
 # Step 4: We discretize the Ornstein-Uhlenbleck Process (Defining the future time, S_t+1, with the current S_t, where S is spread)
 # Step 5: Run regression of S_t+1 on S_t, obtaining residuals along the way.
 # Step 6: Calculate the Z-Scores
-
-
-# Step 1
-def calculationOfSpread(series1, series2):
-    # The gist is series1['open'] - series2['open']
-
-    # first, we check if the data being passed is acceptable
-    if isinstance(series1, pd.DataFrame) and isinstance(series2, pd.DataFrame):
-        if 'open' not in series1.columns or 'open' not in series2.columns:
-            print(f"\t'open' column missing in series1 or series2, skipping.")
-        series1 = series1['open'].reset_index(level='symbol', drop=True)
-        series2 = series2['open'].reset_index(level='symbol', drop=True)
-    elif isinstance(series1, pd.Series)  and isinstance(series2, pd.Series):
-        # Already a Series, no 'open' column to extract
-        series1 = series1.reset_index(level='symbol', drop=True)
-        series2 = series2.reset_index(level='symbol', drop=True)
-    else:
-        print(f"\tUnexpected data type for series1 or series2, skipping.")
-
-    # second, we then fill in missing data for either with the previous time step.
-
-    timeReference =  pd.Series(series1.index.to_pydatetime().tolist()).align(pd.Series(series2.index.to_pydatetime().tolist()), join='outer')
-    print(timeReference)
-import pandas as pd
 import datetime
-
 def normalizeTimeSeries(timeSeries, date):
     # Ensure timestamp is datetime and set index properly
     timeSeries = timeSeries.copy()
@@ -92,3 +67,34 @@ def normalizeTimeSeries(timeSeries, date):
         normalizedFrames.append(filledDf)
 
     return pd.concat(normalizedFrames).sort_index()
+
+
+# Step 1
+def calculationOfSpread(series1, series2):
+    # The gist is series1['open'] - series2['open']
+    start = datetime.datetime(2025,8,1,13,0) 
+    end = datetime.datetime(2025, 8, 1, 22, 0) 
+    series1 = normalizeTimeSeries(series1, start)
+    series2 = normalizeTimeSeries(series2, start)
+    # first, we check if the data being passed is acceptable
+    if isinstance(series1, pd.DataFrame) and isinstance(series2, pd.DataFrame):
+        if 'open' not in series1.columns or 'open' not in series2.columns:
+            print(f"\t'open' column missing in series1 or series2, skipping.")
+        series1 = series1['open'].reset_index(level='symbol', drop=True)
+        series2 = series2['open'].reset_index(level='symbol', drop=True)
+    elif isinstance(series1, pd.Series)  and isinstance(series2, pd.Series):
+        # Already a Series, no 'open' column to extract
+        series1 = series1.reset_index(level='symbol', drop=True)
+        series2 = series2.reset_index(level='symbol', drop=True)
+    else:
+        print(f"\tUnexpected data type for series1 or series2, skipping.")
+
+    # second, we then fill in missing data for either with the previous time step.
+    spread = series1 - series2
+
+    # timeReference =  pd.Series(series1.index.to_pydatetime().tolist()).align(pd.Series(series2.index.to_pydatetime().tolist()), join='outer')
+    # print("Series1 df:\n", series1)
+    # print("Series2 df:\n", series2)
+    # print("The spread of series1 and series2\n", spread)
+    return spread
+
