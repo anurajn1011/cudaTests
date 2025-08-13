@@ -1,7 +1,8 @@
 from DataProcessing import DataProcessing
+import statistics
 # dates
 
-def backtest(algoName,algo, ticker1, ticker2, startDate, endDate,initialValue) :
+def backtest(algoName,algo, tickers, startDate, endDate,initialValue) :
     """Run a backtest given market data and trading signals. Returns a df with following columns"""
     # columns algoName, ticker1, ticker2, startDate, endDate,initialValue, finalValue, percent change
     results = []
@@ -10,8 +11,33 @@ def backtest(algoName,algo, ticker1, ticker2, startDate, endDate,initialValue) :
         results.append((price, signal))
     return results
     pass
+# TODO consider adding moving average class from crossover moving average trading algo
+# TODO Need to redesigning the return tuple into a dictionary this was various key values can be easily accessed and return uniformly in the back test function incase data is needed on a recurring basis
+def CoIntStdDiv(ticker1NewData, ticker2NewData, movingAvgSeries, movingAvgVal, newData ):
 
-def CoIntStdDiv():
+    movingAvgSeries.appened(newData)
+    if len(movingAvgSeries) < 1200:
+        movingAvgSeriesSum = sum(movingAvgSeries)
+        movingAvgSeriesLen = len(movingAvgSeries)
+        newMovingAverage  =  movingAvgSeriesSum/movingAvgSeriesLen
+        return (movingAvgSeries, newMovingAverage, "No Change")
+    # take a moving avg over 1200 steps (20 min) 
+    movingAvgSeries.pop(0)
+    
+    # recalculate new moving avg
+    movingAvgSeriesSum = sum(movingAvgSeries)
+    movingAvgSeriesLen = len(movingAvgSeries)
+    newMovingAverage  =  movingAvgSeriesSum/movingAvgSeriesLen
+    # take stdiv of the moving avg
+    std_dev = statistics.stdev(movingAvgSeries)
+    # set upper bound to stdiv + moving avg 
+    upperBound = std_dev + newMovingAverage
+    # set lower bound to stdiv - moving avg 
+    lowerBound = std_dev - newMovingAverage
+    # when the diffrenece between the stock falls sout of bouynds buy or sell 
+    if newMovingAverage < lowerBound and :
+        return (movingAvgSeries, newMovingAverage, "Buy")
+
     return 1
 
 
