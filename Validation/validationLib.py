@@ -2,71 +2,65 @@ from DataProcessing import DataProcessing
 import statistics
 # dates
 
-def backtest(algoName,algo, tickers, startDate, endDate,initialValue) :
+def backtest(algoName, strategySpecificArgs) :
     """Run a backtest given market data and trading signals. Returns a df with following columns"""
     # columns algoName, ticker1, ticker2, startDate, endDate,initialValue, finalValue, percent change
+    datagett = DataProcessing
+    
     results = []
     for price in data:
-        signal = strategy_func(price, *strategy_args)
+        signal = algoName(price, strategySpecificArgs)
         results.append((price, signal))
     return results
     pass
 # TODO consider adding moving average class from crossover moving average trading algo
 # TODO Need to redesigning the return tuple into a dictionary this was various key values can be easily accessed and return uniformly in the back test function incase data is needed on a recurring basis
-def CoIntStdDiv(ticker1NewData, ticker2NewData, movingAvgSeries, movingAvgVal, newData ):
+def CoIntStdDiv(newData, strategySpecificArgs):
 
-    movingAvgSeries.appened(newData)
-    if len(movingAvgSeries) < 1200:
-        movingAvgSeriesSum = sum(movingAvgSeries)
-        movingAvgSeriesLen = len(movingAvgSeries)
+    strategySpecificArgs["movingAvgSeries"].appened(newData)
+    if len(strategySpecificArgs["movingAvgSeries"]) < 1200:
+        movingAvgSeriesSum = sum(strategySpecificArgs["movingAvgSeries"])
+        movingAvgSeriesLen = len(strategySpecificArgs["movingAvgSeries"])
         newMovingAverage  =  movingAvgSeriesSum/movingAvgSeriesLen
-        return (movingAvgSeries, newMovingAverage, "No Change")
+        return (strategySpecificArgs)
     # take a moving avg over 1200 steps (20 min) 
-    movingAvgSeries.pop(0)
-    
+    strategySpecificArgs["movingAvgSeries"]
+    zScore, stdDiv, movingAvg = CoIntStdDivStats()
     # recalculate new moving avg
-    movingAvgSeriesSum = sum(movingAvgSeries)
-    movingAvgSeriesLen = len(movingAvgSeries)
+    movingAvgSeriesSum = sum(strategySpecificArgs["movingAvgSeries"])
+    movingAvgSeriesLen = len(strategySpecificArgs["movingAvgSeries"])
     newMovingAverage  =  movingAvgSeriesSum/movingAvgSeriesLen
     # take stdiv of the moving avg
-    std_dev = statistics.stdev(movingAvgSeries)
+    std_dev = statistics.stdev(strategySpecificArgs["movingAvgSeries"])
     # set upper bound to stdiv + moving avg 
     upperBound = std_dev + newMovingAverage
     # set lower bound to stdiv - moving avg 
     lowerBound = std_dev - newMovingAverage
+    # Signal Generation-------------------------------------
+    
+    #Enter Short Position: If Z>Upper Threshold, short the spread (sell outperforming asset, buy underperforming asset).
+    if zScore>upperBound: # is opposite
+        pass
+    #Enter Long Position: If Z<Lower Threshold, long the spread (buy underperforming asset, sell outperforming asset).
+    if zScore<lowerBound:#stock2 is over performing or stock1 is underperforming
+        if 1 > 1 # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then sell
+            pass
+        if 1 > 1 # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then buy
+            pass 
+
+    #Exit Position: If Z reverts to within the exit thresholds or approaches zero, close the position.
+
     # when the diffrenece between the stock falls sout of bouynds buy or sell 
-    if newMovingAverage < lowerBound and :
-        return (movingAvgSeries, newMovingAverage, "Buy")
+    if newMovingAverage < lowerBound and strategySpecificArgs["SharesOwnedT1"] :
+        return (strategySpecificArgs["movingAvgSeries"]) 
 
     return 1
 
+# setup to inherit from data getter
+class Pair:
 
 
 
-
-
-# This kind of nesting is the goal to facilitate good UX
-# def algo1(price, param_a, param_b):
-#     """Decide buy/sell/hold based on current price and params."""
-#     if price > param_a:
-#         return "BUY"
-#     elif price < param_b:
-#         return "SELL"
-#     return "HOLD"
-
-# def backtest(strategy_func, data, *strategy_args):
-#     """Run backtest by calling strategy_func on each price."""
-#     results = []
-#     for price in data:
-#         signal = strategy_func(price, *strategy_args)
-#         results.append((price, signal))
-#     return results
-
-# # Example market data
-# prices = [95, 102, 88, 110, 97]
-
-# # Pass the function itself, plus its params
-# results = backtest(algo1, prices, 100, 90)
-
-# for price, signal in results:
-#     print(f"Price: {price}, Signal: {signal}")
+# TODO Anuraj, returns zscore stddiv and moving avg
+def CoIntStdDivStats() ->  Tuple[float, float, float]:
+    return 1
