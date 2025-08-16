@@ -36,17 +36,28 @@ def CoIntStdDiv(newData, strategySpecificArgs):
     upperBound = std_dev + newMovingAverage
     # set lower bound to stdiv - moving avg 
     lowerBound = std_dev - newMovingAverage
+
+    stock1PriceMA = 1
+    stock1Std = 1
+    stock2PriceMA = 1
+    stock2Std = 1
     # Signal Generation-------------------------------------
-    
     #Enter Short Position: If Z>Upper Threshold, short the spread (sell outperforming asset, buy underperforming asset).
     if zScore>upperBound: # is opposite
-        pass
+        # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then buy
+        if stock2PriceMA > stock2Std and  strategySpecificArgs["SharesOwnedT2"] > 0:
+            strategySpecificArgs["SharesOwnedT2"] += 1
+        # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then sell
+        if stock1PriceMA > stock1Std and  strategySpecificArgs["SharesOwnedT1"] <= 0: 
+            strategySpecificArgs["SharesOwnedT1"] -= 1
     #Enter Long Position: If Z<Lower Threshold, long the spread (buy underperforming asset, sell outperforming asset).
     if zScore<lowerBound:#stock2 is over performing or stock1 is underperforming
-        if 1 > 1 # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then sell
-            pass
-        if 1 > 1 # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then buy
-            pass 
+        # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then sell
+        if stock2PriceMA > stock2Std and  strategySpecificArgs["SharesOwnedT2"] > 0:
+            strategySpecificArgs["SharesOwnedT2"] -= 1
+        # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then buy
+        if stock1PriceMA > stock1Std and  strategySpecificArgs["SharesOwnedT1"] <= 0: 
+            strategySpecificArgs["SharesOwnedT1"] += 1
 
     #Exit Position: If Z reverts to within the exit thresholds or approaches zero, close the position.
 
@@ -58,6 +69,11 @@ def CoIntStdDiv(newData, strategySpecificArgs):
 
 # setup to inherit from data getter
 class Pair:
+     def __init__(self, ticker1, ticker2 ):
+        # Instance variables (unique to each object) 
+        self.ticker1 = ticker1
+        self.ticker2 = ticker2
+        self.year = year
 
 
 
