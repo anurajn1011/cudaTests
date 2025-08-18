@@ -14,14 +14,13 @@ def backtest(algoName, strategySpecificArgs) :
     return results
     pass
 # TODO consider adding moving average class from crossover moving average trading algo
-# TODO Need to redesigning the return tuple into a dictionary this was various key values can be easily accessed and return uniformly in the back test function incase data is needed on a recurring basis
 def CoIntStdDiv(newData, strategySpecificArgs):
-
-    strategySpecificArgs["movingAvgSeries"].appened(newData)
-    if len(strategySpecificArgs["movingAvgSeries"]) < 1200:
-        movingAvgSeriesSum = sum(strategySpecificArgs["movingAvgSeries"])
-        movingAvgSeriesLen = len(strategySpecificArgs["movingAvgSeries"])
-        newMovingAverage  =  movingAvgSeriesSum/movingAvgSeriesLen
+    s1Data, s2Data  = newData
+    pair = CoIntStdDivPair("s1", "s2")
+    pair.addNewDataPoints(s1Data, s2Data)
+    
+    lenMASeriesS1, lenMASeriesS2 = pair.getPairsMALen()
+    if lenMASeriesS1 < 1200 and lenMASeriesS2 < 1200:
         return (strategySpecificArgs)
     # take a moving avg over 1200 steps (20 min) 
     strategySpecificArgs["movingAvgSeries"]
@@ -67,14 +66,54 @@ def CoIntStdDiv(newData, strategySpecificArgs):
 
     return 1
 
+# TODO consider removing ticker1 and ticker 2 as inputs since these were intended as string tickers, however since they are not needed maybe vestigial
 # setup to inherit from data getter
-class Pair:
+class CoIntStdDivPair:
      def __init__(self, ticker1, ticker2 ):
         # Instance variables (unique to each object) 
         self.ticker1 = ticker1
         self.ticker2 = ticker2
-        self.year = year
+        self.maSeriesS1 = []
+        self.maSeriesS2 = []
+        self.maSeriesS1S2 = []
+        self.maS1S2Val = 0
+        self.maSeriesS1Val = 0
+        self.maSeriesS2Val = 0
+        self.stddivS1 = 0
+        self.stddivS2 = 0
+        self.stddivS1S2 = 0
+        
 
+        # Add new data points to stock1 and stock2 and calcs new stats
+        def addNewDataPoints(self, ticker1NewData, ticker2NewData):
+            self.maSeriesS1.append(ticker1NewData)
+            self.maSeriesS2.append(ticker2NewData)
+            self.maSeriesS1S2.append(ticker1NewData-ticker2NewData) #TODO check with Anuraj, I remember smthn about MA being negative for combined but unsure
+            # Calc MAVals S1,S2, S1S2  
+            self.maSeriesS1Val  =  sum(self.maSeriesS1)/len(self.maSeriesS1)
+            self.maSeriesS2Val  =  sum(self.maSeriesS2)/len(self.maSeriesS2)
+            self.maS1S2Val  =  sum(self.maSeriesS1S2)/len(self.maSeriesS1S2)
+            # Calc stddivS1,stddivS2, stddivS1S2 and ZscoreS1S2
+            self.stddivS1 = statistics.stdev(self.maSeriesS1)
+            self.stddivS2 = statistics.stdev(self.maSeriesS2)
+            self.stddivS1S2 = statistics.stdev(self.maSeriesS1S2)
+
+        # Gets stock1 MA and Std
+        def getStock1Stats():
+            return (self.maSeriesS1Val, self.stddivS1)
+
+        # Gets stock2 MA and Std
+        def getStock2Stats():
+            return (self.maSeriesS2Val, self.stddivS2)
+        
+        def getPairsMALen():
+            return (len(self.maSeriesS1, len(self.maSeriesS2)))
+
+        # Gets  zScore, stdDiv, movingAvg for both stocks
+        def getCoIntStdDivStats():
+            return 1
+
+        
 
 
 # TODO Anuraj, returns zscore stddiv and moving avg
