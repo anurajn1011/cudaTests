@@ -119,5 +119,18 @@ class CoIntStdDivPair:
         # Gets  zScore, stdDiv, movingAvg for both stocks
         # TODO Anuraj calc zscore
         def getCoIntStdDivStats():
+            '''
+                Z = (spread_t - mu) / sigma; The mean and std can be computed using the model parameters,
+                which follows from the discretization of the OU model. 
+
+                Lambda: Speed of mean reversion
+                Mu: mean
+                Sigma: std
+
+                Given the discretized OU Model: S_(t+1) = aS_t + b + epsilon (Not Euler-Mauryama)
+                lambda = -log(a)/delta(t) 
+                mu = b/(1-a)
+                sigma = std(epsilon) * sqrt((-2*log(a)) / (delta(t) * (1-a**2)))
+            '''
             return (0, self.stddivS1S2, self.maS1S2Val)
 
