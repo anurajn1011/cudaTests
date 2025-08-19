@@ -124,7 +124,7 @@ class CoIntStdDivPair:
                 which follows from the discretization of the OU model. 
 
                 Lambda: Speed of mean reversion
-                Mu: mean
+                Mu: mean 
                 Sigma: std
 
                 Given the discretized OU Model: S_(t+1) = aS_t + b + epsilon (Not Euler-Mauryama)
@@ -132,5 +132,7 @@ class CoIntStdDivPair:
                 mu = b/(1-a)
                 sigma = std(epsilon) * sqrt((-2*log(a)) / (delta(t) * (1-a**2)))
             '''
-            return (0, self.stddivS1S2, self.maS1S2Val)
+            lam, mu, sigma = 0, 0, 0
+            return (lam, mu, sigma)
+            # return (0, self.stddivS1S2, self.maS1S2Val)
 
