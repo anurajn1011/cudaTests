@@ -132,7 +132,7 @@ class CoIntStdDivPair:
                 mu = b/(1-a)
                 sigma = std(epsilon) * sqrt((-2*log(a)) / (delta(t) * (1-a**2)))
             '''
-            lam, mu, sigma = 0, 0, 1
+            lam, mu, sigma = 0, 0, 0
             return (lam, mu, sigma)
             # return (0, self.stddivS1S2, self.maS1S2Val)
 
