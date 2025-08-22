@@ -18,8 +18,6 @@ def backtest(algoName, strategySpecificArgs) :
     series1 = normalizeTimeSeries(series1, startDate)
     series2 = normalizeTimeSeries(series2, startDate)
     
-    results = []
-    # TODO this for loop is sus, s1 and s2 might not be addresable to open column in this way
     for stock1Data, stock2Data in zip(series1['open'], series2['open']):
         strategySpecificArgs = algoName((stock1Data,stock2Data), strategySpecificArgs)
 
@@ -28,7 +26,6 @@ def backtest(algoName, strategySpecificArgs) :
         
 
 
-# TODO need to 'buy'/sell shares by using the cashWallet value
 def CoIntStdDiv(newData, strategySpecificArgs):
     s1Data, s2Data  = newData
     pair = CoIntStdDivPair("s1", "s2")
@@ -46,33 +43,36 @@ def CoIntStdDiv(newData, strategySpecificArgs):
     # set lower bound to stdiv - moving avg 
     lowerBound = stdDiv - movingAvgVal # can stay just needs to change std_dev and newMA vars
 
-    stock1PriceMA, stock1Std = pair.getStock1Stats() 
-    stock2PriceMA, stock2Std = pair.getStock2Stats()
+    stock1PriceMAVal, stock1Std = pair.getStock1Stats() 
+    stock2PriceMAVal, stock2Std = pair.getStock2Stats()
     
     # Signal Generation-------------------------------------
     #Enter Short Position: If Z>Upper Threshold, short the spread (sell outperforming asset, buy underperforming asset).
     if zScore>upperBound: # is opposite
         # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then buy
-        if stock2PriceMA > stock2Std and  strategySpecificArgs["SharesOwnedT2"] > 0: #change references to use pairs
-            strategySpecificArgs["SharesOwnedT2"] += 1 
+        if s1Data > stock2Std + stock2PriceMAVal  and  strategySpecificArgs["SharesOwnedT1"] > 0 and strategySpecificArgs["cashWallet"] > s2Data: #change references to use pairs
+            newShares = strategySpecificArgs["cashWallet"] // s2Data
+            strategySpecificArgs["SharesOwnedT2"] += newShares
+            strategySpecificArgs["cashWallet"] -= newShares*s2Data
         # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then sell
-        if stock1PriceMA > stock1Std and  strategySpecificArgs["SharesOwnedT1"] <= 0: #change references to use pairs
-            strategySpecificArgs["SharesOwnedT1"] -= 1
+        if s2Data > stock1Std - stock1PriceMAVal and  strategySpecificArgs["SharesOwnedT1"] <= 0 : #change references to use pairs
+            newCash = strategySpecificArgs["SharesOwnedT1"]*s1Data
+            strategySpecificArgs["SharesOwnedT1"] = 0
+            strategySpecificArgs["cashWallet"] += newCash
     #Enter Long Position: If Z<Lower Threshold, long the spread (buy underperforming asset, sell outperforming asset).
     if zScore<lowerBound:#stock2 is over performing or stock1 is underperforming
         # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then sell
-        if stock2PriceMA > stock2Std and  strategySpecificArgs["SharesOwnedT2"] > 0:#change references to use pairs
-            strategySpecificArgs["SharesOwnedT2"] -= 1
+        if s1Data > stock2Std-stock2PriceMAVal and  strategySpecificArgs["SharesOwnedT2"] > 0 :#change references to use pairs
+            newCash = strategySpecificArgs["SharesOwnedT2"] * s2Data
+            strategySpecificArgs["SharesOwnedT2"] = 0 
+            strategySpecificArgs["SharesOwnedT2"] += newCash
         # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then buy
-        if stock1PriceMA > stock1Std and  strategySpecificArgs["SharesOwnedT1"] <= 0: #change references to use pairs
-            strategySpecificArgs["SharesOwnedT1"] += 1
+        if s2Data > stock1Std - stock1PriceMAVal and  strategySpecificArgs["SharesOwnedT1"] <= 0 and strategySpecificArgs["cashWallet"] > s1Data: #change references to use pairs
+            newShares = strategySpecificArgs["cashWallet"] // s1Data
+            strategySpecificArgs["SharesOwnedT1"] += newShares
+            strategySpecificArgs["cashWallet"] -= newShares*s1Data
 
-    #Exit Position: If Z reverts to within the exit thresholds or approaches zero, close the position.
 
-    # TODO wtf was this for
-    # when the diffrenece between the stock falls sout of bouynds buy or sell 
-    if newMovingAverage < lowerBound and strategySpecificArgs["SharesOwnedT1"] :
-        return (strategySpecificArgs["movingAvgSeries"]) 
 
     return (strategySpecificArgs)
 
@@ -92,9 +92,18 @@ class CoIntStdDivPair:
 
         # Add new data points to stock1 and stock2 and calcs new stats
         def addNewDataPoints(self, ticker1NewData, ticker2NewData):
-            self.maSeriesS1.append(ticker1NewData)
-            self.maSeriesS2.append(ticker2NewData)
-            self.maSeriesS1S2.append(ticker1NewData-ticker2NewData) #TODO check with Anuraj, I remember smthn about MA being negative for combined but unsure
+            # Append to MA
+            if (len(self.maSeriesS1) < 1200):
+                self.maSeriesS1.append(ticker1NewData)
+                self.maSeriesS2.append(ticker2NewData)
+                self.maSeriesS1S2.append(ticker1NewData-ticker2NewData)
+            else:
+                self.maSeriesS1.pop()
+                self.maSeriesS2.pop()
+                self.maSeriesS1S2.pop()
+                self.maSeriesS1.append(ticker1NewData)
+                self.maSeriesS2.append(ticker2NewData)
+                self.maSeriesS1S2.append(ticker1NewData-ticker2NewData)            
             # Calc MAVals S1,S2, S1S2  
             self.maSeriesS1Val  =  sum(self.maSeriesS1)/len(self.maSeriesS1)
             self.maSeriesS2Val  =  sum(self.maSeriesS2)/len(self.maSeriesS2)
