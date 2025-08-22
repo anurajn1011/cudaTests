@@ -76,7 +76,6 @@ def CoIntStdDiv(newData, strategySpecificArgs):
 
     return (strategySpecificArgs)
 
-# setup to inherit from data getter
 class CoIntStdDivPair:
      def __init__(self, maLen ):
         # Instance variables (unique to each object) 
