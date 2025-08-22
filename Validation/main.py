@@ -5,6 +5,8 @@ import statsmodels.api as sm
 import pandas as pd
 import statistics
 from DataProcessing import DataProcessing
+import json
+
 
 
 # The core of the backtesting loop works by drip feeding data 1 point at a time to an algo that decides if on the new data point it should buy or sell
@@ -48,7 +50,7 @@ def CoIntStdDiv(newData, strategySpecificArgs):
     # set upper bound to stdiv + moving avg 
     upperBound = stdDiv + movingAvgVal # can stay just needs to change std_dev and newMA vars
     # set lower bound to stdiv - moving avg 
-    lowerBound = stdDiv - movingAvgVal # can stay just needs to change std_dev and newMA vars
+    lowerBound = movingAvgVal - stdDiv  # can stay just needs to change std_dev and newMA vars
 
     stock1PriceMAVal, stock1Std = pair.getStock1Stats() 
     stock2PriceMAVal, stock2Std = pair.getStock2Stats()
@@ -61,11 +63,13 @@ def CoIntStdDiv(newData, strategySpecificArgs):
             newShares = strategySpecificArgs["cashWallet"] // s2Data
             strategySpecificArgs["SharesOwnedT2"] += newShares
             strategySpecificArgs["cashWallet"] -= newShares*s2Data
+            print("buying S2")
         # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then sell
         if s2Data > stock1Std - stock1PriceMAVal and  strategySpecificArgs["SharesOwnedT1"] <= 0 : #change references to use pairs
             newCash = strategySpecificArgs["SharesOwnedT1"]*s1Data
             strategySpecificArgs["SharesOwnedT1"] = 0
             strategySpecificArgs["cashWallet"] += newCash
+            print("selling S1")
     #Enter Long Position: If Z<Lower Threshold, long the spread (buy underperforming asset, sell outperforming asset).
     if zScore<lowerBound:#stock2 is over performing or stock1 is underperforming
         # is stock2pricefrom last 20 point > 1 std deviation of only stock2 and we have holding then sell
@@ -73,11 +77,13 @@ def CoIntStdDiv(newData, strategySpecificArgs):
             newCash = strategySpecificArgs["SharesOwnedT2"] * s2Data
             strategySpecificArgs["SharesOwnedT2"] = 0 
             strategySpecificArgs["SharesOwnedT2"] += newCash
+            print("selling S2")
         # is stock1pricefrom last 20 point > 1 std deviation of only stock1 and we have holding then buy
         if s2Data > stock1Std - stock1PriceMAVal and  strategySpecificArgs["SharesOwnedT1"] <= 0 and strategySpecificArgs["cashWallet"] > s1Data: #change references to use pairs
             newShares = strategySpecificArgs["cashWallet"] // s1Data
             strategySpecificArgs["SharesOwnedT1"] += newShares
             strategySpecificArgs["cashWallet"] -= newShares*s1Data
+            print("buying S1")
 
 
 
@@ -198,12 +204,24 @@ def main():
     # ==================
     df1 = 0
     df2 = 0
+    file_path = 'Validation\model_params.json' 
+    with open(file_path, 'r') as file:
+        # Load the JSON data from the file into a Python dictionary
+        data_dict = json.load(file)
 
-    CoIntStdDivArgs1 = {"ticker1":"ACDC", "ticker2":"AIRJ", "cashWallet":1000 ,"startDate":datetime.datetime(2025,8,1,13,0), "endDate":datetime.datetime(2025, 8, 1, 21, 0), "SharesOwnedT1": 0, "SharesOwnedT2": 0} 
-    CoIntStdDivArgs1 = backTest(CoIntStdDiv, CoIntStdDivArgs1)
+
+    # CoIntStdDivArgs1 = {"ticker1":"ACDC", "ticker2":"AIRJ", "cashWallet":1000 ,"startDate":datetime.datetime(2025,8,1,13,0), "endDate":datetime.datetime(2025, 8, 1, 21, 0), "SharesOwnedT1": 0, "SharesOwnedT2": 0} 
+    results = []
+    for pair in data_dict:
+        print(pair["ticker1"] + " " + pair["ticker2"])
+        CoIntStdDivArgs = {"ticker1":pair["ticker1"], "ticker2":pair["ticker2"], "cashWallet":1000 ,"startDate":datetime.datetime(2025,8,1,13,0), "endDate":datetime.datetime(2025, 8, 1, 21, 0), "SharesOwnedT1": 0, "SharesOwnedT2": 0} 
+        CoIntStdDivArgs = backTest(CoIntStdDiv, CoIntStdDivArgs)
+        results.append(CoIntStdDivArgs)
+
+    df1 = pd.DataFrame(results)
     
-    df1 = pd.DataFrame([CoIntStdDivArgs1])
-
+    # df1 = pd.DataFrame([CoIntStdDivArgs1])
+    df1.to_csv("backtestResults.csv")
     print(df1)
     
     
